@@ -1,0 +1,7 @@
+- id: jenkinsfile-lint
+  name: jenkinsfile-lint
+  description: ensures Jenkinsfile is valid
+  entry: ./linter.sh
+  types: [file]
+  files: ^.*(Jenkinsfile.*|.*\.groovy)$
+  require_serial: true

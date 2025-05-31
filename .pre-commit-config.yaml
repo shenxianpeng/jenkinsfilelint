@@ -1,0 +1,11 @@
+repos:
+  - repo: local
+    # This is a "local" hook to run linter.sh (see https://pre-commit.com/#repository-local-hooks)
+    hooks:
+      - id: linter
+        name: lint Jenkins file
+        description: validate jenkinsfile
+        entry: ./linter.sh
+        language: script
+        files: (?i)\bJenkinsfile\b|\.groovy$|Jenkinsfile
+        verbose: true
