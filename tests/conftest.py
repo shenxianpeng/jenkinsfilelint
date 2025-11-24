@@ -4,19 +4,27 @@
 import pytest
 import tempfile
 import os
-from unittest.mock import patch
 
 
 @pytest.fixture(autouse=True)
 def clean_environment():
     """Clean Jenkins-related environment variables for all tests."""
     jenkins_vars = ["JENKINS_URL", "JENKINS_USER", "JENKINS_TOKEN"]
-    with patch.dict(
-        os.environ,
-        {k: v for k, v in os.environ.items() if k not in jenkins_vars},
-        clear=True,
-    ):
-        yield
+    # Save the original values
+    original_values = {k: os.environ.get(k) for k in jenkins_vars}
+
+    # Remove Jenkins variables
+    for var in jenkins_vars:
+        os.environ.pop(var, None)
+
+    yield
+
+    # Restore original values
+    for k, v in original_values.items():
+        if v is not None:
+            os.environ[k] = v
+        else:
+            os.environ.pop(k, None)
 
 
 @pytest.fixture
