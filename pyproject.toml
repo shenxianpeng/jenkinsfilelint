@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jenkinsfilelint"
+dynamic = ["version"]
+authors = [
+    {name = "Xianpeng Shen", email = "xianpeng.shen@gmail.com"},
+]
+description = "A Jenkinsfile linter that validates Jenkinsfiles using Jenkins API"
+readme = "README.md"
+requires-python = ">=3.6"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "requests",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/shenxianpeng/jenkinsfilelint"
+
+[project.scripts]
+jenkinsfilelint = "jenkinsfilelint.cli:main"
+
+[tool.setuptools]
+packages = ["jenkinsfilelint"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--strict-config",
+]
+
+[tool.coverage.run]
+source = ["jenkinsfilelint"]
+omit = ["*/tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]

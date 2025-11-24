@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""Command-line interface for jenkinsfilelint."""
+
+import sys
+import argparse
+import io
+from .linter import JenkinsfileLinter
+
+
+def main():
+    """Main entry point for the CLI."""
+    # Ensure stdout and stderr use UTF-8 encoding on Windows
+    if sys.platform == "win32":
+        sys.stdout = io.TextIOWrapper(
+            sys.stdout.buffer, encoding="utf-8", errors="replace"
+        )
+        sys.stderr = io.TextIOWrapper(
+            sys.stderr.buffer, encoding="utf-8", errors="replace"
+        )
+
+    parser = argparse.ArgumentParser(
+        description="Validate Jenkinsfiles using Jenkins API or basic syntax checking"
+    )
+    parser.add_argument(
+        "jenkinsfile",
+        nargs="+",
+        help="Path to Jenkinsfile(s) to validate",
+    )
+    parser.add_argument(
+        "--jenkins-url",
+        help="Jenkins server URL (can also be set via JENKINS_URL env var)",
+    )
+    parser.add_argument(
+        "--username",
+        help="Jenkins username (can also be set via JENKINS_USER env var)",
+    )
+    parser.add_argument(
+        "--token",
+        help="Jenkins API token (can also be set via JENKINS_TOKEN env var)",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Verbose output",
+    )
+
+    args = parser.parse_args()
+
+    # Create linter instance
+    linter = JenkinsfileLinter(
+        jenkins_url=args.jenkins_url,
+        username=args.username,
+        token=args.token,
+    )
+
+    # Validate all provided files
+    all_valid = True
+    for jenkinsfile in args.jenkinsfile:
+        if args.verbose:
+            print(f"Validating {jenkinsfile}...")
+
+        is_valid, message = linter.validate(jenkinsfile)
+
+        if is_valid:
+            if args.verbose or len(args.jenkinsfile) > 1:
+                print(f"✓ {jenkinsfile}: Valid")
+            if args.verbose and message:
+                print(f"  {message}")
+        else:
+            print(f"✗ {jenkinsfile}: Invalid", file=sys.stderr)
+            print(f"  {message}", file=sys.stderr)
+            all_valid = False
+
+    # Exit with appropriate code
+    sys.exit(0 if all_valid else 1)
+
+
+if __name__ == "__main__":
+    main()

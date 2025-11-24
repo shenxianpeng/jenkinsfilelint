@@ -1,11 +1,25 @@
 repos:
-  - repo: local
-    # This is a "local" hook to run linter.sh (see https://pre-commit.com/#repository-local-hooks)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
     hooks:
-      - id: linter
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+      - id: debug-statements
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.6
+    hooks:
+      - id: ruff-check
+      - id: ruff-format
+  - repo: local
+    # This is a "local" hook to run jenkinsfilelint
+    hooks:
+      - id: jenkinsfile-lint
         name: lint Jenkins file
         description: validate jenkinsfile
-        entry: ./linter.sh
-        language: script
-        files: (?i)\bJenkinsfile\b|\.groovy$|Jenkinsfile
+        entry: jenkinsfilelint
+        language: python
+        files: (?i)^(.*/)?(Jenkinsfile[^/]*|.*\.groovy)$
+        exclude: ^jenkinsfilelint/
         verbose: true

@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0  # Required for setuptools-scm
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+
+    - name: Test CLI installation
+      run: |
+        jenkinsfilelint --help
+
+    - name: Test basic linting
+      run: |
+        jenkinsfilelint -v tests/Jenkinsfile
+
+    - name: Test linting with Jenkins server (if credentials are set)
+      shell: bash
+      env:
+        JENKINS_URL: ${{ secrets.JENKINS_URL }}
+        JENKINS_USER: ${{ secrets.JENKINS_USER }}
+        JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN }}
+      run: |
+        if [ -n "$JENKINS_URL" ] && [ -n "$JENKINS_USER" ] && [ -n "$JENKINS_TOKEN" ]; then
+          jenkinsfilelint -v tests/Jenkinsfile.fail  &> output.log
+          grep -q "Not a valid section definition" output.log
+        else
+          echo "Jenkins credentials not set; skipping Jenkins validation test."
+        fi
+
+    - name: Run unit tests (if they exist)
+      run: |
+        if [ -f "tests/test_linter.py" ]; then
+          pip install pytest
+          pytest tests/
+        fi
+      shell: bash
+      continue-on-error: true
