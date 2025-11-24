@@ -20,10 +20,11 @@ class TestCLIMain:
 
     def test_validate_single_valid_file(self):
         """Test validation of a single valid file."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy") as f:
-            f.write("pipeline { agent any }")
-            f.flush()
-            temp_path = f.name
+        f = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy")
+        f.write("pipeline { agent any }")
+        f.flush()
+        f.close()
+        temp_path = f.name
 
         try:
             with patch("sys.argv", ["jenkinsfilelint", temp_path]):
@@ -35,10 +36,11 @@ class TestCLIMain:
 
     def test_validate_single_invalid_file(self, capsys):
         """Test validation of a single invalid file."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
-            f.write("")  # Empty file
-            f.flush()
-            temp_path = f.name
+        f = tempfile.NamedTemporaryFile(mode="w", delete=False)
+        f.write("")  # Empty file
+        f.flush()
+        f.close()
+        temp_path = f.name
 
         try:
             with patch("sys.argv", ["jenkinsfilelint", temp_path]):
@@ -54,19 +56,17 @@ class TestCLIMain:
 
     def test_validate_multiple_files(self):
         """Test validation of multiple files."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", delete=False, suffix="1.groovy"
-        ) as f1:
-            f1.write("pipeline { agent any }")
-            f1.flush()
-            temp_path1 = f1.name
+        f1 = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix="1.groovy")
+        f1.write("pipeline { agent any }")
+        f1.flush()
+        f1.close()
+        temp_path1 = f1.name
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", delete=False, suffix="2.groovy"
-        ) as f2:
-            f2.write("@Library('lib') _\necho 'test'")
-            f2.flush()
-            temp_path2 = f2.name
+        f2 = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix="2.groovy")
+        f2.write("@Library('lib') _\necho 'test'")
+        f2.flush()
+        f2.close()
+        temp_path2 = f2.name
 
         try:
             with patch("sys.argv", ["jenkinsfilelint", temp_path1, temp_path2]):
@@ -79,19 +79,17 @@ class TestCLIMain:
 
     def test_validate_multiple_files_with_one_invalid(self, capsys):
         """Test validation of multiple files where one is invalid."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", delete=False, suffix="1.groovy"
-        ) as f1:
-            f1.write("pipeline { agent any }")
-            f1.flush()
-            temp_path1 = f1.name
+        f1 = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix="1.groovy")
+        f1.write("pipeline { agent any }")
+        f1.flush()
+        f1.close()
+        temp_path1 = f1.name
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", delete=False, suffix="2.groovy"
-        ) as f2:
-            f2.write("")  # Empty file
-            f2.flush()
-            temp_path2 = f2.name
+        f2 = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix="2.groovy")
+        f2.write("")  # Empty file
+        f2.flush()
+        f2.close()
+        temp_path2 = f2.name
 
         try:
             with patch("sys.argv", ["jenkinsfilelint", temp_path1, temp_path2]):
@@ -104,10 +102,11 @@ class TestCLIMain:
 
     def test_validate_with_verbose_flag(self, capsys):
         """Test validation with verbose output."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy") as f:
-            f.write("pipeline { agent any }")
-            f.flush()
-            temp_path = f.name
+        f = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy")
+        f.write("pipeline { agent any }")
+        f.flush()
+        f.close()
+        temp_path = f.name
 
         try:
             with patch("sys.argv", ["jenkinsfilelint", "--verbose", temp_path]):
@@ -123,10 +122,11 @@ class TestCLIMain:
 
     def test_validate_with_jenkins_url_argument(self):
         """Test validation with Jenkins URL argument."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy") as f:
-            f.write("pipeline { agent any }")
-            f.flush()
-            temp_path = f.name
+        f = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy")
+        f.write("pipeline { agent any }")
+        f.flush()
+        f.close()
+        temp_path = f.name
 
         try:
             with patch(
@@ -154,10 +154,11 @@ class TestCLIMain:
 
     def test_validate_with_username_and_token_arguments(self):
         """Test validation with username and token arguments."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy") as f:
-            f.write("pipeline { agent any }")
-            f.flush()
-            temp_path = f.name
+        f = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy")
+        f.write("pipeline { agent any }")
+        f.flush()
+        f.close()
+        temp_path = f.name
 
         try:
             with patch(
@@ -202,10 +203,11 @@ class TestCLIMain:
 
     def test_validate_with_env_variables(self):
         """Test validation using environment variables for configuration."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy") as f:
-            f.write("pipeline { agent any }")
-            f.flush()
-            temp_path = f.name
+        f = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy")
+        f.write("pipeline { agent any }")
+        f.flush()
+        f.close()
+        temp_path = f.name
 
         try:
             with patch.dict(

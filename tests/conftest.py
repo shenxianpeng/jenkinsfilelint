@@ -30,9 +30,9 @@ def clean_environment():
 @pytest.fixture
 def valid_jenkinsfile():
     """Create a temporary valid Jenkinsfile."""
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy") as f:
-        f.write(
-            """
+    f = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy")
+    f.write(
+        """
 pipeline {
     agent any
     stages {
@@ -49,9 +49,10 @@ pipeline {
     }
 }
 """
-        )
-        f.flush()
-        temp_path = f.name
+    )
+    f.flush()
+    f.close()
+    temp_path = f.name
 
     yield temp_path
     os.unlink(temp_path)
@@ -60,10 +61,11 @@ pipeline {
 @pytest.fixture
 def empty_jenkinsfile():
     """Create a temporary empty Jenkinsfile."""
-    with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
-        f.write("")
-        f.flush()
-        temp_path = f.name
+    f = tempfile.NamedTemporaryFile(mode="w", delete=False)
+    f.write("")
+    f.flush()
+    f.close()
+    temp_path = f.name
 
     yield temp_path
     os.unlink(temp_path)
@@ -72,10 +74,11 @@ def empty_jenkinsfile():
 @pytest.fixture
 def invalid_jenkinsfile():
     """Create a temporary invalid Jenkinsfile (no pipeline declaration)."""
-    with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
-        f.write("// Just a comment\necho 'hello world'")
-        f.flush()
-        temp_path = f.name
+    f = tempfile.NamedTemporaryFile(mode="w", delete=False)
+    f.write("// Just a comment\necho 'hello world'")
+    f.flush()
+    f.close()
+    temp_path = f.name
 
     yield temp_path
     os.unlink(temp_path)
@@ -84,16 +87,17 @@ def invalid_jenkinsfile():
 @pytest.fixture
 def library_jenkinsfile():
     """Create a temporary Jenkinsfile with @Library declaration."""
-    with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
-        f.write(
-            """
+    f = tempfile.NamedTemporaryFile(mode="w", delete=False)
+    f.write(
+        """
 @Library('my-shared-library') _
 
 myCustomFunction()
 """
-        )
-        f.flush()
-        temp_path = f.name
+    )
+    f.flush()
+    f.close()
+    temp_path = f.name
 
     yield temp_path
     os.unlink(temp_path)

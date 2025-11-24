@@ -1,5 +1,8 @@
 # Jenkinsfile Lint
 
+[![CI](https://github.com/shenxianpeng/jenkinsfilelint/actions/workflows/main.yml/badge.svg)](https://github.com/shenxianpeng/jenkinsfilelint/actions/workflows/main.yml)
+
+
 A Python-based Jenkinsfile linter that validates Jenkinsfiles using Jenkins API or performs basic syntax checking.
 
 ## Features

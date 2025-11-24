@@ -10,13 +10,22 @@ from .linter import JenkinsfileLinter
 def main():
     """Main entry point for the CLI."""
     # Ensure stdout and stderr use UTF-8 encoding on Windows
+    # Only wrap if not already wrapped to avoid issues in tests
     if sys.platform == "win32":
-        sys.stdout = io.TextIOWrapper(
-            sys.stdout.buffer, encoding="utf-8", errors="replace"
-        )
-        sys.stderr = io.TextIOWrapper(
-            sys.stderr.buffer, encoding="utf-8", errors="replace"
-        )
+        if (
+            not isinstance(sys.stdout, io.TextIOWrapper)
+            or sys.stdout.encoding.lower() != "utf-8"
+        ):
+            sys.stdout = io.TextIOWrapper(
+                sys.stdout.buffer, encoding="utf-8", errors="replace"
+            )
+        if (
+            not isinstance(sys.stderr, io.TextIOWrapper)
+            or sys.stderr.encoding.lower() != "utf-8"
+        ):
+            sys.stderr = io.TextIOWrapper(
+                sys.stderr.buffer, encoding="utf-8", errors="replace"
+            )
 
     parser = argparse.ArgumentParser(
         description="Validate Jenkinsfiles using Jenkins API or basic syntax checking"
