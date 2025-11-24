@@ -166,7 +166,7 @@ class TestJenkinsfileLinterValidateWithJenkins:
         finally:
             os.unlink(temp_path)
 
-    @patch("jenkinsfilelint.linter.requests.post")
+    @patch("requests.post")
     def test_validate_successful_with_text_response(self, mock_post):
         """Test successful validation with text response."""
         mock_response = Mock()
@@ -189,7 +189,7 @@ class TestJenkinsfileLinterValidateWithJenkins:
         finally:
             os.unlink(temp_path)
 
-    @patch("jenkinsfilelint.linter.requests.post")
+    @patch("requests.post")
     def test_validate_successful_with_json_response(self, mock_post):
         """Test successful validation with JSON response."""
         mock_response = Mock()
@@ -211,7 +211,7 @@ class TestJenkinsfileLinterValidateWithJenkins:
         finally:
             os.unlink(temp_path)
 
-    @patch("jenkinsfilelint.linter.requests.post")
+    @patch("requests.post")
     def test_validate_with_errors_in_json(self, mock_post):
         """Test validation with errors in JSON response."""
         mock_response = Mock()
@@ -237,7 +237,7 @@ class TestJenkinsfileLinterValidateWithJenkins:
         finally:
             os.unlink(temp_path)
 
-    @patch("jenkinsfilelint.linter.requests.post")
+    @patch("requests.post")
     def test_validate_with_json_error_no_error_list(self, mock_post):
         """Test validation with JSON error response but no errors list."""
         mock_response = Mock()
@@ -262,7 +262,7 @@ class TestJenkinsfileLinterValidateWithJenkins:
         finally:
             os.unlink(temp_path)
 
-    @patch("jenkinsfilelint.linter.requests.post")
+    @patch("requests.post")
     def test_validate_with_errors_in_text(self, mock_post):
         """Test validation with errors in text response."""
         mock_response = Mock()
@@ -285,7 +285,7 @@ class TestJenkinsfileLinterValidateWithJenkins:
         finally:
             os.unlink(temp_path)
 
-    @patch("jenkinsfilelint.linter.requests.post")
+    @patch("requests.post")
     def test_validate_with_authentication(self, mock_post):
         """Test validation with authentication."""
         mock_response = Mock()
@@ -316,7 +316,7 @@ class TestJenkinsfileLinterValidateWithJenkins:
         finally:
             os.unlink(temp_path)
 
-    @patch("jenkinsfilelint.linter.requests.post")
+    @patch("requests.post")
     def test_validate_connection_error(self, mock_post):
         """Test validation when connection to Jenkins fails."""
         import requests
@@ -356,7 +356,7 @@ class TestJenkinsfileLinterValidate:
         assert is_valid is False
         assert "File not found" in message
 
-    @patch("jenkinsfilelint.linter.requests.post")
+    @patch("requests.post")
     def test_validate_with_jenkins_url_uses_jenkins_validation(self, mock_post):
         """Test that Jenkins validation is used when URL is set."""
         mock_response = Mock()
