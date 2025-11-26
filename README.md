@@ -94,7 +94,7 @@ Or using command-line arguments:
 ```yaml
 repos:
   - repo: https://github.com/shenxianpeng/jenkinsfilelint
-    rev: v1.1.0
+    rev: # or specific version tag
     hooks:
       - id: jenkinsfilelint
         args: ["--jenkins-url=https://your-jenkins-instance.com", "--username=your-username", "--token=your-api-token"]
