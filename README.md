@@ -5,7 +5,7 @@
 
 A Python-based Jenkinsfile linter that validates Jenkinsfiles using Jenkins API.
 
-## Contents
+## Table of Contents
 
 - [Features](#features)
 - [Installation](#installation)
