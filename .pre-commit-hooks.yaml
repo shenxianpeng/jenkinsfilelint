@@ -1,6 +1,6 @@
-- id: jenkinsfile-lint
-  name: jenkinsfile-lint
-  description: ensures Jenkinsfile is valid
+- id: jenkinsfilelint
+  name: jenkinsfilelint
+  description: Lint Jenkinsfiles and Groovy files.
   entry: jenkinsfilelint
   language: python
   types: [file]

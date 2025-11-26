@@ -64,90 +64,6 @@ class TestJenkinsfileLinterInit:
             assert linter.token is None
 
 
-class TestJenkinsfileLinterValidateSyntax:
-    """Test basic syntax validation without Jenkins."""
-
-    def test_validate_valid_jenkinsfile(self):
-        """Test validation of a valid Jenkinsfile."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy") as f:
-            f.write(
-                """
-pipeline {
-    agent any
-    stages {
-        stage('Build') {
-            steps {
-                sh 'echo Building'
-            }
-        }
-    }
-}
-"""
-            )
-            f.flush()
-            temp_path = f.name
-
-        try:
-            linter = JenkinsfileLinter()
-            is_valid, message = linter._validate_syntax(temp_path)
-            assert is_valid is True
-            assert "appears valid" in message
-        finally:
-            os.unlink(temp_path)
-
-    def test_validate_empty_file(self):
-        """Test validation of an empty file."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
-            f.write("")
-            f.flush()
-            temp_path = f.name
-
-        try:
-            linter = JenkinsfileLinter()
-            is_valid, message = linter._validate_syntax(temp_path)
-            assert is_valid is False
-            assert "empty" in message.lower()
-        finally:
-            os.unlink(temp_path)
-
-    def test_validate_file_without_pipeline(self):
-        """Test validation of a file without pipeline declaration."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
-            f.write("// Just a comment\necho 'hello'")
-            f.flush()
-            temp_path = f.name
-
-        try:
-            linter = JenkinsfileLinter()
-            is_valid, message = linter._validate_syntax(temp_path)
-            assert is_valid is False
-            assert "pipeline declaration" in message.lower()
-        finally:
-            os.unlink(temp_path)
-
-    def test_validate_file_with_library(self):
-        """Test validation of a file with @Library declaration."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
-            f.write("@Library('my-library') _\necho 'hello'")
-            f.flush()
-            temp_path = f.name
-
-        try:
-            linter = JenkinsfileLinter()
-            is_valid, message = linter._validate_syntax(temp_path)
-            assert is_valid is True
-            assert "appears valid" in message
-        finally:
-            os.unlink(temp_path)
-
-    def test_validate_nonexistent_file(self):
-        """Test validation of a nonexistent file."""
-        linter = JenkinsfileLinter()
-        is_valid, message = linter._validate_syntax("/nonexistent/file.groovy")
-        assert is_valid is False
-        assert "Error reading file" in message
-
-
 class TestJenkinsfileLinterValidateWithJenkins:
     """Test validation using Jenkins API."""
 
@@ -379,8 +295,8 @@ class TestJenkinsfileLinterValidate:
         finally:
             os.unlink(temp_path)
 
-    def test_validate_without_jenkins_url_uses_syntax_validation(self):
-        """Test that syntax validation is used when Jenkins URL is not set."""
+    def test_validate_without_jenkins_url_requires_credentials(self):
+        """Test that validation fails when Jenkins URL is not set."""
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
             f.write("pipeline { agent any }")
             f.flush()
@@ -389,7 +305,7 @@ class TestJenkinsfileLinterValidate:
         try:
             linter = JenkinsfileLinter()
             is_valid, message = linter.validate(temp_path)
-            assert is_valid is True
-            assert "basic syntax check" in message
+            assert is_valid is False
+            assert "credentials required" in message.lower()
         finally:
             os.unlink(temp_path)

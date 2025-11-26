@@ -5,6 +5,7 @@ import sys
 import argparse
 import io
 from .linter import JenkinsfileLinter
+from . import __version__
 
 
 def main():
@@ -28,7 +29,13 @@ def main():
             )
 
     parser = argparse.ArgumentParser(
-        description="Validate Jenkinsfiles using Jenkins API or basic syntax checking"
+        description="Validate Jenkinsfiles using Jenkins API"
+    )
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     parser.add_argument(
         "jenkinsfile",
@@ -72,6 +79,7 @@ def main():
         is_valid, message = linter.validate(jenkinsfile)
 
         if is_valid:
+            # Show valid status for multiple files or when verbose
             if args.verbose or len(args.jenkinsfile) > 1:
                 print(f"✓ {jenkinsfile}: Valid")
             if args.verbose and message:

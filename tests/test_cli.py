@@ -18,8 +18,8 @@ class TestCLIMain:
                 main()
             assert exc_info.value.code == 0
 
-    def test_validate_single_valid_file(self):
-        """Test validation of a single valid file."""
+    def test_validate_single_valid_file(self, capsys):
+        """Test validation of a single valid file requires credentials."""
         f = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy")
         f.write("pipeline { agent any }")
         f.flush()
@@ -30,7 +30,10 @@ class TestCLIMain:
             with patch("sys.argv", ["jenkinsfilelint", temp_path]):
                 with pytest.raises(SystemExit) as exc_info:
                     main()
-                assert exc_info.value.code == 0
+                assert exc_info.value.code == 1
+
+            captured = capsys.readouterr()
+            assert "credentials required" in captured.err.lower()
         finally:
             os.unlink(temp_path)
 
@@ -50,12 +53,12 @@ class TestCLIMain:
 
             captured = capsys.readouterr()
             assert "Invalid" in captured.err
-            assert "empty" in captured.err.lower()
+            assert "credentials required" in captured.err.lower()
         finally:
             os.unlink(temp_path)
 
-    def test_validate_multiple_files(self):
-        """Test validation of multiple files."""
+    def test_validate_multiple_files(self, capsys):
+        """Test validation of multiple files requires credentials."""
         f1 = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix="1.groovy")
         f1.write("pipeline { agent any }")
         f1.flush()
@@ -72,7 +75,10 @@ class TestCLIMain:
             with patch("sys.argv", ["jenkinsfilelint", temp_path1, temp_path2]):
                 with pytest.raises(SystemExit) as exc_info:
                     main()
-                assert exc_info.value.code == 0
+                assert exc_info.value.code == 1
+
+            captured = capsys.readouterr()
+            assert "credentials required" in captured.err.lower()
         finally:
             os.unlink(temp_path1)
             os.unlink(temp_path2)
@@ -101,7 +107,7 @@ class TestCLIMain:
             os.unlink(temp_path2)
 
     def test_validate_with_verbose_flag(self, capsys):
-        """Test validation with verbose output."""
+        """Test validation with verbose output requires credentials."""
         f = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".groovy")
         f.write("pipeline { agent any }")
         f.flush()
@@ -112,11 +118,11 @@ class TestCLIMain:
             with patch("sys.argv", ["jenkinsfilelint", "--verbose", temp_path]):
                 with pytest.raises(SystemExit) as exc_info:
                     main()
-                assert exc_info.value.code == 0
+                assert exc_info.value.code == 1
 
             captured = capsys.readouterr()
             assert "Validating" in captured.out
-            assert "appears valid" in captured.out
+            assert "credentials required" in captured.err.lower()
         finally:
             os.unlink(temp_path)
 

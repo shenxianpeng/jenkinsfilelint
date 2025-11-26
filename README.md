@@ -1,24 +1,32 @@
 # Jenkinsfile Lint
 
 [![CI](https://github.com/shenxianpeng/jenkinsfilelint/actions/workflows/main.yml/badge.svg)](https://github.com/shenxianpeng/jenkinsfilelint/actions/workflows/main.yml)
+[![codecov](https://codecov.io/gh/shenxianpeng/jenkinsfilelint/graph/badge.svg?token=Z9UTXBL2XG)](https://codecov.io/gh/shenxianpeng/jenkinsfilelint)
 
+A Python-based Jenkinsfile linter that validates Jenkinsfiles using Jenkins API.
 
-A Python-based Jenkinsfile linter that validates Jenkinsfiles using Jenkins API or performs basic syntax checking.
+## Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [How It Works](#how-it-works)
+- [Requirements](#requirements)
+- [License](#license)
 
 ## Features
 
 - Validates Jenkinsfiles using Jenkins REST API
-- Falls back to basic syntax checking when Jenkins is not available
 - Works as a pre-commit hook
 - Supports both command-line usage and environment variables for configuration
-- No mandatory Jenkins credentials required (but recommended for full validation)
+- Requires Jenkins credentials for validation
 
 ## Installation
 
 ### Using pip
 
 ```bash
-pip install -e .
+pip install jenkinsfilelint
 ```
 
 ### Using pre-commit
@@ -28,22 +36,23 @@ Add this to your `.pre-commit-config.yaml`:
 ```yaml
 repos:
   - repo: https://github.com/shenxianpeng/jenkinsfilelint
-    rev: main  # or specific version tag
+    rev: # or specific version tag
     hooks:
-      - id: jenkinsfile-lint
+      - id: jenkinsfilelint
 ```
 
 ## Usage
 
+> [!IMPORTANT]
+> jenkinsfilelint requires Jenkins credentials to be set via environment variables for validation:
+>
+> - `JENKINS_URL`: Your Jenkins server URL (required)
+> - `JENKINS_USER`: Your Jenkins username (required unless anonymous access is enabled)
+> - `JENKINS_TOKEN`: Your Jenkins API token (required unless anonymous access is enabled)
+
 ### Command Line
 
-Basic usage (performs syntax check only):
-
-```bash
-jenkinsfilelint path/to/Jenkinsfile
-```
-
-With Jenkins validation (using environment variables):
+Validation requires Jenkins credentials. Set them using environment variables:
 
 ```bash
 export JENKINS_URL=https://your-jenkins-instance.com
@@ -53,7 +62,7 @@ export JENKINS_TOKEN=your-api-token
 jenkinsfilelint path/to/Jenkinsfile
 ```
 
-With Jenkins validation (using command-line arguments):
+Or using command-line arguments:
 
 ```bash
 jenkinsfilelint path/to/Jenkinsfile \
@@ -68,27 +77,16 @@ Validate multiple files:
 jenkinsfilelint Jenkinsfile Jenkinsfile.prod tests/Jenkinsfile
 ```
 
-### Environment Variables
-
-- `JENKINS_URL`: Your Jenkins server URL
-- `JENKINS_USER`: Your Jenkins username (optional if anonymous read access is enabled)
-- `JENKINS_TOKEN`: Your Jenkins API token (optional if anonymous read access is enabled)
-
 ### Pre-commit Hook
 
 Create or update `.pre-commit-config.yaml` in your repository:
 
 ```yaml
 repos:
-  - repo: local
+  - repo: https://github.com/shenxianpeng/jenkinsfilelint
+    rev: # or specific version tag
     hooks:
-      - id: jenkinsfile-lint
-        name: Lint Jenkinsfile
-        description: Validate Jenkinsfile
-        entry: jenkinsfilelint
-        language: python
-        types: [file]
-        files: ^(Jenkinsfile(\..*)?|.*\.groovy)$
+      - id: jenkinsfilelint
 ```
 
 Then install the pre-commit hook:
@@ -99,14 +97,12 @@ pre-commit install
 
 ## How It Works
 
-1. **With Jenkins API**: When Jenkins credentials are provided, the linter sends the Jenkinsfile to your Jenkins instance's `/pipeline-model-converter/validate` endpoint for full validation.
-
-2. **Without Jenkins API**: When Jenkins credentials are not provided, the linter performs basic syntax checking to ensure the file is not empty and contains expected pipeline declarations.
+The linter sends the Jenkinsfile to your Jenkins instance's `/pipeline-model-converter/validate` endpoint for validation. Jenkins credentials (URL, username, and API token) are required.
 
 ## Requirements
 
 - Python 3.6+
-- requests library
+- Jenkins server with Pipeline plugin installed
 
 ## License
 
