@@ -5,16 +5,17 @@ import sys
 import argparse
 import fnmatch
 import io
+from typing import List, Optional
 from .linter import JenkinsfileLinter
 from . import __version__
 
 
-def should_skip_file(filepath: str, skip_patterns: list) -> bool:
+def should_skip_file(filepath: str, skip_patterns: Optional[List[str]]) -> bool:
     """Check if a file should be skipped based on the provided patterns.
 
     Args:
         filepath: Path to the file to check
-        skip_patterns: List of glob patterns to match against
+        skip_patterns: List of glob patterns to match against, or None
 
     Returns:
         True if the file should be skipped, False otherwise
