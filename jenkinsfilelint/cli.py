@@ -3,9 +3,29 @@
 
 import sys
 import argparse
+import fnmatch
 import io
 from .linter import JenkinsfileLinter
 from . import __version__
+
+
+def should_skip_file(filepath: str, skip_patterns: list) -> bool:
+    """Check if a file should be skipped based on the provided patterns.
+
+    Args:
+        filepath: Path to the file to check
+        skip_patterns: List of glob patterns to match against
+
+    Returns:
+        True if the file should be skipped, False otherwise
+    """
+    if not skip_patterns:
+        return False
+
+    for pattern in skip_patterns:
+        if fnmatch.fnmatch(filepath, pattern):
+            return True
+    return False
 
 
 def main():
@@ -60,6 +80,14 @@ def main():
         action="store_true",
         help="Verbose output",
     )
+    parser.add_argument(
+        "--skip",
+        action="append",
+        default=[],
+        metavar="PATTERN",
+        help="Glob pattern(s) for files to skip. Can be used multiple times. "
+        "Example: --skip '*/src/*.groovy' --skip 'vars/*.groovy'",
+    )
 
     args = parser.parse_args()
 
@@ -73,6 +101,12 @@ def main():
     # Validate all provided files
     all_valid = True
     for jenkinsfile in args.jenkinsfile:
+        # Check if file should be skipped
+        if should_skip_file(jenkinsfile, args.skip):
+            if args.verbose:
+                print(f"⊘ {jenkinsfile}: Skipped (matches skip pattern)")
+            continue
+
         if args.verbose:
             print(f"Validating {jenkinsfile}...")
 
