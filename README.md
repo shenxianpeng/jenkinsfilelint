@@ -89,6 +89,21 @@ repos:
       - id: jenkinsfilelint
 ```
 
+Or using command-line arguments:
+
+```yaml
+repos:
+  - repo: https://github.com/shenxianpeng/jenkinsfilelint
+    rev: v1.1.0
+    hooks:
+      - id: jenkinsfilelint
+        args: ["--jenkins-url=https://your-jenkins-instance.com", "--username=your-username", "--token=your-api-token"]
+```
+
+> [!WARNING]
+> Using `args` to pass credentials directly in the configuration file is not recommended for security reasons.
+> Consider using environment variables instead. For more details, see [pre-commit/pre-commit#758](https://github.com/pre-commit/pre-commit/issues/758#issuecomment-505935221).
+
 Then install the pre-commit hook:
 
 ```bash
