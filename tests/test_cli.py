@@ -52,13 +52,17 @@ class TestCLIMain:
                 assert exc_info.value.code == 1
 
             captured = capsys.readouterr()
-            assert "Invalid" in captured.err
+            # Error message is printed without filename prefix for deduplication
             assert "credentials required" in captured.err.lower()
         finally:
             os.unlink(temp_path)
 
     def test_validate_multiple_files(self, capsys):
-        """Test validation of multiple files requires credentials."""
+        """Test validation of multiple files requires credentials.
+
+        Error messages should be deduplicated - the same error should only
+        appear once even when multiple files have the same error.
+        """
         f1 = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix="1.groovy")
         f1.write("pipeline { agent any }")
         f1.flush()
@@ -78,7 +82,10 @@ class TestCLIMain:
                 assert exc_info.value.code == 1
 
             captured = capsys.readouterr()
+            # Verify the error is present
             assert "credentials required" in captured.err.lower()
+            # Verify deduplication - the credentials message should appear exactly once
+            assert captured.err.lower().count("credentials required") == 1
         finally:
             os.unlink(temp_path1)
             os.unlink(temp_path2)

@@ -102,6 +102,8 @@ def main():
 
     # Validate all provided files
     all_valid = True
+    printed_messages = set()  # Track messages already printed for deduplication
+
     for jenkinsfile in args.jenkinsfile:
         # Check if file should be skipped
         if should_skip_file(jenkinsfile, args.skip):
@@ -121,8 +123,10 @@ def main():
             if args.verbose and message:
                 print(f"  {message}")
         else:
-            print(f"✗ {jenkinsfile}: Invalid", file=sys.stderr)
-            print(f"  {message}", file=sys.stderr)
+            # Deduplicate error messages (e.g., credentials errors)
+            if message not in printed_messages:
+                print(f"  {message}", file=sys.stderr)
+                printed_messages.add(message)
             all_valid = False
 
     # Exit with appropriate code
