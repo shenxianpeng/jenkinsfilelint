@@ -3,8 +3,8 @@
 
 import sys
 import argparse
-import fnmatch
 import io
+from pathlib import Path
 from typing import List, Optional
 from .linter import JenkinsfileLinter
 from . import __version__
@@ -23,8 +23,9 @@ def should_skip_file(filepath: str, skip_patterns: Optional[List[str]]) -> bool:
     if not skip_patterns:
         return False
 
+    path = Path(filepath)
     for pattern in skip_patterns:
-        if fnmatch.fnmatch(filepath, pattern):
+        if path.match(pattern):
             return True
     return False
 
