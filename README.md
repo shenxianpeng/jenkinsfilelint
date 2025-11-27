@@ -21,6 +21,7 @@ A Python-based Jenkinsfile linter that validates Jenkinsfiles using Jenkins API.
 - Supports both command-line usage and environment variables for configuration
 - Requires Jenkins credentials for validation
 - Supports skipping files that are not Jenkins pipelines (e.g., pure Groovy helper classes)
+- Supports including only specific files or folders for validation
 
 ## Installation
 
@@ -92,6 +93,20 @@ jenkinsfilelint --skip '*/src/*.groovy' --skip 'vars/*.groovy' Jenkinsfile src/U
 
 The `--skip` option accepts glob patterns and can be used multiple times.
 
+### Including Specific Files
+
+Use the `--include` option to validate only files matching specific patterns:
+
+```bash
+# Include only Jenkinsfiles
+jenkinsfilelint --include 'Jenkinsfile*' Jenkinsfile Jenkinsfile.prod src/Utils.groovy
+
+# Include multiple patterns
+jenkinsfilelint --include 'Jenkinsfile*' --include '*/pipelines/*.groovy' .
+```
+
+The `--include` option accepts glob patterns and can be used multiple times. When specified, only files matching at least one pattern will be validated.
+
 ### Pre-commit Hook
 
 Create or update `.pre-commit-config.yaml` in your repository:
@@ -124,6 +139,17 @@ repos:
     hooks:
       - id: jenkinsfilelint
         args: ["--skip=*/src/*.groovy", "--skip=vars/*.groovy"]
+```
+
+To include only specific files:
+
+```yaml
+repos:
+  - repo: https://github.com/shenxianpeng/jenkinsfilelint
+    rev: # or specific version tag
+    hooks:
+      - id: jenkinsfilelint
+        args: ["--include=Jenkinsfile*", "--include=*/pipelines/*.groovy"]
 ```
 
 > [!WARNING]
