@@ -154,7 +154,9 @@ jenkinsfilelint Jenkinsfile --format github
 Valid files produce no output. This format is ideal for:
 - **GitHub Actions** — inline annotations in PR diffs
 - **Jenkins pipeline self-validation** — parseable by pipeline scripts
-- **External validators** (ODS, custom CI systems) — structured, machine-friendly output
+- **External validators** (ODS[^1], custom CI systems) — structured, machine-friendly output
+
+[^1]: [Open Delivery Stack](https://github.com/opendeliverystack) — an open-source CI/CD framework for automated software delivery.
 
 ### Pre-commit Hook
 
