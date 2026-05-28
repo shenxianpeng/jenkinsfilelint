@@ -166,6 +166,12 @@ Then install the pre-commit hook:
 pre-commit install
 ```
 
+## Security Notes
+
+- Do not commit Jenkins tokens to `.pre-commit-config.yaml`.
+- Prefer environment variables or local secret managers.
+- Avoid using administrator tokens for local linting.
+
 ## How It Works
 
 The linter sends the Jenkinsfile to your Jenkins instance's `/pipeline-model-converter/validate` endpoint for validation. Jenkins credentials (URL, username, and API token) are required.
