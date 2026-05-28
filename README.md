@@ -168,7 +168,7 @@ pre-commit install
 
 ## Security Notes
 
-- Do not commit Jenkins tokens to `.pre-commit-config.yaml`.
+- Do not commit Jenkins tokens to `.pre-commit-config.yaml` or `.env` .
 - Prefer environment variables or local secret managers.
 - Avoid using administrator tokens for local linting.
 
