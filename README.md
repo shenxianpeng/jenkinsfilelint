@@ -172,7 +172,7 @@ The linter sends the Jenkinsfile to your Jenkins instance's `/pipeline-model-con
 
 ## Requirements
 
-- Python 3.6+
+- Python 3.10+
 - Jenkins server with Pipeline plugin installed
 
 ## License
