@@ -4,10 +4,61 @@
 import sys
 import argparse
 import io
+import json
+import re
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from .linter import JenkinsfileLinter
 from . import __version__
+
+
+def _extract_line_number(message: str) -> Optional[int]:
+    """Extract line number from a Jenkins validation error message.
+
+    Jenkins error messages often follow patterns like:
+        WorkflowScript: 12: Expected a stage...
+        WorkflowScript: 5: unexpected token: ...
+
+    Args:
+        message: The error message from Jenkins validation.
+
+    Returns:
+        The line number if found, None otherwise.
+    """
+    match = re.search(r'WorkflowScript[:\s]+(\d+)', message)
+    if match:
+        return int(match.group(1))
+    return None
+
+
+def _format_json(results: List[Dict[str, Any]]) -> None:
+    """Output validation results as JSON to stdout.
+
+    Args:
+        results: List of per-file result dicts with keys: file, valid, message.
+    """
+    json.dump(results, sys.stdout, indent=2)
+    sys.stdout.write("\n")
+
+
+def _format_github(results: List[Dict[str, Any]]) -> None:
+    """Output validation results as GitHub Actions workflow annotations.
+
+    Emits GitHub workflow command annotations for each invalid file.
+    Format: ::error file=<path>,line=<N>::<message>
+
+    Args:
+        results: List of per-file result dicts with keys: file, valid, message.
+    """
+    for result in results:
+        if result["valid"]:
+            continue
+        line = _extract_line_number(result["message"])
+        if line is not None:
+            annotation = f'::error file={result["file"]},line={line}::{result["message"]}'
+        else:
+            annotation = f'::error file={result["file"]}::{result["message"]}'
+        print(annotation)
 
 
 def should_skip_file(filepath: str, skip_patterns: Optional[List[str]]) -> bool:
@@ -122,6 +173,15 @@ def main():
         "matching at least one pattern are validated. Can be used multiple times. "
         "Example: --include 'Jenkinsfile*' --include 'pipelines/*.groovy'",
     )
+    parser.add_argument(
+        "--format",
+        choices=["json", "github"],
+        default=None,
+        help="Output format for machine consumption. "
+        "'json' writes per-file structured JSON. "
+        "'github' emits GitHub Actions workflow annotations. "
+        "Default: human-readable text output.",
+    )
 
     args = parser.parse_args()
 
@@ -135,26 +195,34 @@ def main():
     # Validate all provided files
     all_valid = True
     printed_messages = set()  # Track messages already printed for deduplication
+    machine_results: List[Dict[str, Any]] = []
+    use_machine_format = args.format is not None
 
     for jenkinsfile in args.jenkinsfile:
         # Check if file should be included (whitelist)
         if not should_include_file(jenkinsfile, args.include):
-            if args.verbose:
+            if args.verbose and not use_machine_format:
                 print(f"⊘ {jenkinsfile}: Skipped (does not match include pattern)")
             continue
 
         # Check if file should be skipped (blacklist)
         if should_skip_file(jenkinsfile, args.skip):
-            if args.verbose:
+            if args.verbose and not use_machine_format:
                 print(f"⊘ {jenkinsfile}: Skipped (matches skip pattern)")
             continue
 
-        if args.verbose:
+        if args.verbose and not use_machine_format:
             print(f"Validating {jenkinsfile}...")
 
         is_valid, message = linter.validate(jenkinsfile)
 
-        if is_valid:
+        if use_machine_format:
+            machine_results.append({
+                "file": jenkinsfile,
+                "valid": is_valid,
+                "message": message,
+            })
+        elif is_valid:
             # Show valid status for multiple files or when verbose
             if args.verbose or len(args.jenkinsfile) > 1:
                 print(f"✓ {jenkinsfile}: Valid")
@@ -167,8 +235,18 @@ def main():
                 printed_messages.add(message)
             all_valid = False
 
+    # Output machine-readable results if format was requested
+    if use_machine_format:
+        if args.format == "json":
+            _format_json(machine_results)
+        elif args.format == "github":
+            _format_github(machine_results)
+
     # Exit with appropriate code
-    sys.exit(0 if all_valid else 1)
+    if use_machine_format:
+        sys.exit(0 if all(r["valid"] for r in machine_results) else 1)
+    else:
+        sys.exit(0 if all_valid else 1)
 
 
 if __name__ == "__main__":
