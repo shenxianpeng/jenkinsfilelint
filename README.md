@@ -8,9 +8,6 @@ Catch Jenkinsfile syntax errors before they break your CI.
 
 `jenkinsfilelint` validates Jenkinsfiles through your real Jenkins instance and works as a CLI or pre-commit hook.
 
-> [!NOTE]
-> **What it is:** A Jenkinsfile syntax gate — not a Groovy formatter, not a static analyzer. It sends your Jenkinsfile to your Jenkins server's Pipeline validation API and tells you if it will actually parse. If it passes here, it will pass on the server.
-
 ## Table of Contents
 
 - [Features](#features)
@@ -180,7 +177,9 @@ pre-commit install
 
 ## How It Works
 
-The linter sends the Jenkinsfile to your Jenkins instance's `/pipeline-model-converter/validate` endpoint for validation. Jenkins credentials (URL, username, and API token) are required.
+> **What it is:** A Jenkinsfile syntax gate — not a Groovy formatter, not a static analyzer.
+
+The linter sends the Jenkinsfile to your Jenkins instance's `/pipeline-model-converter/validate` endpoint for validation. If it passes here, it will pass on the server. Jenkins credentials (URL, username, and API token) are required.
 
 ## Requirements
 
