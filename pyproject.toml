@@ -10,7 +10,7 @@ authors = [
 ]
 description = "A Jenkinsfile linter that validates Jenkinsfiles using Jenkins API"
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
