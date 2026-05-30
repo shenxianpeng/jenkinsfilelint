@@ -9,6 +9,7 @@ authors = [
     {name = "Xianpeng Shen", email = "xianpeng.shen@gmail.com"},
 ]
 description = "A Jenkinsfile linter that validates Jenkinsfiles using Jenkins API"
+license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
