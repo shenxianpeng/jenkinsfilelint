@@ -2,190 +2,163 @@
 
 [![CI](https://github.com/shenxianpeng/jenkinsfilelint/actions/workflows/main.yml/badge.svg)](https://github.com/shenxianpeng/jenkinsfilelint/actions/workflows/main.yml)
 [![codecov](https://codecov.io/gh/shenxianpeng/jenkinsfilelint/graph/badge.svg?token=Z9UTXBL2XG)](https://codecov.io/gh/shenxianpeng/jenkinsfilelint)
-[![PyPI version](https://img.shields.io/pypi/v/jenkinsfilelint )](https://pypi.org/project/jenkinsfilelint/)
+[![PyPI version](https://img.shields.io/pypi/v/jenkinsfilelint)](https://pypi.org/project/jenkinsfilelint/)
 
 Catch Jenkinsfile syntax errors before they break your CI.
 
-`jenkinsfilelint` validates Jenkinsfiles through your real Jenkins instance and works as a CLI or pre-commit hook.
+`jenkinsfilelint` sends your Jenkinsfiles to your Jenkins server's `/pipeline-model-converter/validate` endpoint for real syntax validation. It's primarily a [pre-commit](https://pre-commit.com/) hook, but also works as a CLI tool.
 
 ## Table of Contents
 
-- [Features](#features)
-- [Installation](#installation)
+- [Quick Start](#quick-start)
 - [Usage](#usage)
-- [Security Notes](#security-notes)
+  - [Pre-commit Hook](#pre-commit-hook)
+  - [CLI](#cli)
+  - [Filtering files](#filtering-files)
+- [Configuration](#configuration)
+- [Security](#security)
 - [How It Works](#how-it-works)
 - [Requirements](#requirements)
+- [Contributing](#contributing)
 - [License](#license)
 
-## Features
-
-- Validates Jenkinsfiles using Jenkins REST API
-- Works as a pre-commit hook
-- Supports both command-line usage and environment variables for configuration
-- Requires Jenkins credentials for validation
-- Supports skipping files that are not Jenkins pipelines (e.g., pure Groovy helper classes)
-
-## Installation
-
-### Using pip
-
-```bash
-pip install jenkinsfilelint
-```
-
-### Using pre-commit
-
-Add this to your `.pre-commit-config.yaml`:
+## Quick Start
 
 ```yaml
+# .pre-commit-config.yaml
 repos:
   - repo: https://github.com/shenxianpeng/jenkinsfilelint
-    rev: # or specific version tag
+    rev: # use the latest or a specific version, e.g. v1.4.0
     hooks:
       - id: jenkinsfilelint
+```
+
+```bash
+export JENKINS_URL=https://jenkins.example.com
+export JENKINS_USER=your-username
+export JENKINS_TOKEN=your-api-token
+
+pip install pre-commit
+pre-commit install
 ```
 
 ## Usage
 
-> [!IMPORTANT]
-> jenkinsfilelint requires Jenkins credentials to be set via environment variables for validation:
->
-> - `JENKINS_URL`: Your Jenkins server URL (required)
-> - `JENKINS_USER`: Your Jenkins username (required unless anonymous access is enabled)
-> - `JENKINS_TOKEN`: Your Jenkins API token (required unless anonymous access is enabled)
+### Pre-commit Hook
 
-### Command Line
-
-Validation requires Jenkins credentials. Set them using environment variables:
+Once installed, every commit that touches a Jenkinsfile is validated:
 
 ```bash
-export JENKINS_URL=https://your-jenkins-instance.com
-export JENKINS_USER=your-username
-export JENKINS_TOKEN=your-api-token
-
-jenkinsfilelint path/to/Jenkinsfile
+git commit -m "Update Jenkinsfile"
+jenkinsfilelint..........................................................Passed
 ```
 
-Or using command-line arguments:
+If the file has a syntax error the commit is blocked:
 
 ```bash
-jenkinsfilelint path/to/Jenkinsfile \
-  --jenkins-url https://your-jenkins-instance.com \
-  --username your-username \
-  --token your-api-token
+git commit -m "Update Jenkinsfile"
+jenkinsfilelint..........................................................Failed
+- hook id: jenkinsfilelint
+- exit code: 1
+
+Errors encountered validating Jenkinsfile:
+WorkflowScript: 17: Expected a step @ line 17, column 11.
+             test
+             ^
 ```
 
-Validate multiple files:
+Fix the error, re-commit, and it passes.
+
+### CLI
 
 ```bash
+pip install jenkinsfilelint
+
+jenkinsfilelint Jenkinsfile
 jenkinsfilelint Jenkinsfile Jenkinsfile.prod tests/Jenkinsfile
 ```
 
-### Skipping Files
+### Filtering files
 
-In Jenkins shared libraries, some Groovy files are pure Groovy helper classes, not Jenkins pipeline scripts. Use the `--skip` option to exclude files from validation:
-
-```bash
-# Skip a specific file pattern
-jenkinsfilelint --skip '*/src/*.groovy' Jenkinsfile src/Utils.groovy
-
-# Skip multiple patterns
-jenkinsfilelint --skip '*/src/*.groovy' --skip 'vars/*.groovy' Jenkinsfile src/Utils.groovy vars/deploy.groovy
-```
-
-The `--skip` option accepts glob patterns and can be used multiple times.
-
-### Including Only Specific Files
-
-Use the `--include` option to validate only files that match specified patterns (whitelist approach). Files not matching any include pattern are silently skipped:
+Use `--include` (whitelist) and `--skip` (blacklist) to control which files are validated:
 
 ```bash
-# Only validate Jenkinsfiles (files starting with "Jenkinsfile")
-jenkinsfilelint --include 'Jenkinsfile*' Jenkinsfile Jenkinsfile.prod src/Utils.groovy
+# Only validate Jenkinsfiles
+jenkinsfilelint --include 'Jenkinsfile*' Jenkinsfile src/Utils.groovy
 
-# Only validate pipeline groovy files in a specific folder
-jenkinsfilelint --include 'pipelines/*.groovy' pipelines/deploy.groovy src/Utils.groovy
-
-# Use multiple include patterns
-jenkinsfilelint --include 'Jenkinsfile*' --include 'pipelines/*.groovy' \
-  Jenkinsfile pipelines/deploy.groovy src/Utils.groovy
+# Exclude shared-library helper classes
+jenkinsfilelint --skip '*/src/*.groovy' --skip 'vars/*.groovy' Jenkinsfile src/Utils.groovy
 ```
 
-The `--include` and `--skip` options can be combined: `--include` first narrows the set of files to consider, then `--skip` further excludes files within that set.
+These work in pre-commit too:
 
-### Pre-commit Hook
-
-Create or update `.pre-commit-config.yaml` in your repository:
+**Exclude non-pipeline Groovy files (shared library helpers):**
 
 ```yaml
-repos:
-  - repo: https://github.com/shenxianpeng/jenkinsfilelint
-    rev: # or specific version tag
-    hooks:
-      - id: jenkinsfilelint
+- id: jenkinsfilelint
+  args: ["--skip=*/src/*.groovy", "--skip=vars/*.groovy"]
 ```
 
-Or using command-line arguments:
+**Only validate files matching specific patterns:**
 
 ```yaml
-repos:
-  - repo: https://github.com/shenxianpeng/jenkinsfilelint
-    rev: # or specific version tag
-    hooks:
-      - id: jenkinsfilelint
-        args: ["--jenkins-url=https://your-jenkins-instance.com", "--username=your-username", "--token=your-api-token"]
+- id: jenkinsfilelint
+  args: ["--include=Jenkinsfile*", "--include=pipelines/*.groovy"]
 ```
 
-To skip certain files (e.g., pure Groovy classes in Jenkins shared libraries):
+You can also combine both — `--include` narrows first, then `--skip` removes from that set:
 
 ```yaml
-repos:
-  - repo: https://github.com/shenxianpeng/jenkinsfilelint
-    rev: # or specific version tag
-    hooks:
-      - id: jenkinsfilelint
-        args: ["--skip=*/src/*.groovy", "--skip=vars/*.groovy"]
+- id: jenkinsfilelint
+  args: ["--include=Jenkinsfile*", "--skip=*/src/*.groovy"]
 ```
 
-To validate only specific files:
+## Configuration
 
-```yaml
-repos:
-  - repo: https://github.com/shenxianpeng/jenkinsfilelint
-    rev: # or specific version tag
-    hooks:
-      - id: jenkinsfilelint
-        args: ["--include=Jenkinsfile*", "--include=pipelines/*.groovy"]
-```
+Supply credentials via environment variables (recommended) or CLI flags:
+
+| Env Variable    | CLI Flag       | Required |
+|-----------------|----------------|----------|
+| `JENKINS_URL`   | `--jenkins-url`| Yes      |
+| `JENKINS_USER`  | `--username`   | No *     |
+| `JENKINS_TOKEN` | `--token`      | No *     |
+
+\* Only required if your Jenkins requires authentication.
+
+> [!TIP]
+> Even if your Jenkins allows anonymous access for validation, using an API token is recommended for production setups.
+
+CLI flags override env vars. There is no config file.
+
+## Security
 
 > [!WARNING]
-> Using `args` to pass credentials directly in the configuration file is not recommended for security reasons.
-> Consider using environment variables instead. For more details, see [pre-commit/pre-commit#758](https://github.com/pre-commit/pre-commit/issues/758#issuecomment-505935221).
+> Never hardcode credentials in config files — use environment variables.
 
-Then install the pre-commit hook:
-
-```bash
-pre-commit install
-```
-
-## Security Notes
-
-- Do not commit Jenkins tokens to `.pre-commit-config.yaml` or `.env` .
-- Prefer environment variables or local secret managers.
-- Avoid using administrator tokens for local linting.
+- **Never** put `--token` or `--username` in `.pre-commit-config.yaml` — use environment variables.
+- Use an API token, not your password.
+- A regular user token with read access is sufficient — no need for admin privileges.
 
 ## How It Works
 
-> **What it is:** A Jenkinsfile syntax gate — not a Groovy formatter, not a static analyzer.
+`jenkinsfilelint` is a **syntax gate** — it checks that your Declarative Pipeline syntax is valid.
 
-The linter sends the Jenkinsfile to your Jenkins instance's `/pipeline-model-converter/validate` endpoint for validation. If it passes here, it will pass on the server. Jenkins credentials (URL, username, and API token) are required.
+1. Reads the local Jenkinsfile.
+2. POSTs it to `<JENKINS_URL>/pipeline-model-converter/validate`.
+3. Jenkins parses the Pipeline and returns `"ok"` or errors.
+4. Errors are printed and the tool exits non-zero.
+
+It only answers: **"Will Jenkins accept this syntax?"**
 
 ## Requirements
 
 - Python 3.10+
-- Jenkins server with Pipeline plugin installed
+- Jenkins server with the Pipeline plugin
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-MIT License
+MIT — see [LICENSE](LICENSE).
