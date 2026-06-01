@@ -8,6 +8,20 @@ Catch Jenkinsfile syntax errors before they break your CI.
 
 `jenkinsfilelint` sends your Jenkinsfiles to your Jenkins server's `/pipeline-model-converter/validate` endpoint for real syntax validation. It's primarily a [pre-commit](https://pre-commit.com/) hook, but also works as a CLI tool.
 
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+  - [Pre-commit Hook](#pre-commit-hook)
+  - [CLI](#cli)
+  - [Filtering files](#filtering-files)
+- [Configuration](#configuration)
+- [Security](#security)
+- [How It Works](#how-it-works)
+- [Requirements](#requirements)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Quick Start
 
 ```yaml
@@ -78,12 +92,26 @@ jenkinsfilelint --skip '*/src/*.groovy' --skip 'vars/*.groovy' Jenkinsfile src/U
 
 These work in pre-commit too:
 
+**Exclude non-pipeline Groovy files (shared library helpers):**
+
+```yaml
+- id: jenkinsfilelint
+  args: ["--skip=*/src/*.groovy", "--skip=vars/*.groovy"]
+```
+
+**Only validate files matching specific patterns:**
+
+```yaml
+- id: jenkinsfilelint
+  args: ["--include=Jenkinsfile*", "--include=pipelines/*.groovy"]
+```
+
+You can also combine both — `--include` narrows first, then `--skip` removes from that set:
+
 ```yaml
 - id: jenkinsfilelint
   args: ["--include=Jenkinsfile*", "--skip=*/src/*.groovy"]
 ```
-
-When both are used, `--include` narrows first, then `--skip` removes from that set.
 
 ## Configuration
 
@@ -91,9 +119,9 @@ Supply credentials via environment variables (recommended) or CLI flags:
 
 | Env Variable    | CLI Flag       | Required |
 |-----------------|----------------|----------|
-| `JENKINS_URL`   | `--jenkins-url` | Yes      |
-| `JENKINS_USER`  | `--username`    | No *     |
-| `JENKINS_TOKEN` | `--token`       | No *     |
+| `JENKINS_URL`   | `--jenkins-url`| Yes      |
+| `JENKINS_USER`  | `--username`   | No *     |
+| `JENKINS_TOKEN` | `--token`      | No *     |
 
 \* Only required if your Jenkins requires authentication.
 
@@ -121,8 +149,7 @@ CLI flags override env vars. There is no config file.
 3. Jenkins parses the Pipeline and returns `"ok"` or errors.
 4. Errors are printed and the tool exits non-zero.
 
-> [!IMPORTANT]
-> It only answers: **"Will Jenkins accept this syntax?"**
+It only answers: **"Will Jenkins accept this syntax?"**
 
 ## Requirements
 
