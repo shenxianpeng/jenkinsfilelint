@@ -122,11 +122,11 @@ class JenkinsfileLinter:
         if not os.path.isfile(jenkinsfile_path):
             return False, f"File not found: {jenkinsfile_path}"
 
-        # Require Jenkins credentials
+        # Require Jenkins URL
         if not self.jenkins_url:
             return (
                 False,
-                "Jenkins credentials required. Set JENKINS_URL, JENKINS_USER, and JENKINS_TOKEN environment variables or use --jenkins-url, --username, and --token arguments.",
+                "Jenkins URL not provided. Set JENKINS_URL environment variable or pass --jenkins-url.",
             )
 
         return self._validate_with_jenkins(jenkinsfile_path)

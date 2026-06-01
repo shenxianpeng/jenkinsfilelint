@@ -35,16 +35,18 @@ pre-commit install
 Once installed, every commit that touches a Jenkinsfile is validated:
 
 ```bash
-git commit -m "Update pipeline"
+git commit -m "Update Jenkinsfile"
 jenkinsfilelint..........................................................Passed
 ```
 
 If the file has a syntax error the commit is blocked:
 
 ```bash
-git commit -m "Update pipeline"
+git commit -m "Update Jenkinsfile"
 jenkinsfilelint..........................................................Failed
+- hook id: jenkinsfilelint
 - exit code: 1
+
 Errors encountered validating Jenkinsfile:
 WorkflowScript: 17: Expected a step @ line 17, column 11.
              test

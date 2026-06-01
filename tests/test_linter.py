@@ -694,6 +694,6 @@ class TestJenkinsfileLinterValidate:
             linter = JenkinsfileLinter()
             is_valid, message = linter.validate(temp_path)
             assert is_valid is False
-            assert "credentials required" in message.lower()
+            assert "jenkins url not provided" in message.lower()
         finally:
             os.unlink(temp_path)

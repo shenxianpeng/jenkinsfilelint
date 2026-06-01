@@ -33,7 +33,7 @@ class TestCLIMain:
                 assert exc_info.value.code == 1
 
             captured = capsys.readouterr()
-            assert "credentials required" in captured.err.lower()
+            assert "jenkins url not provided" in captured.err.lower()
         finally:
             os.unlink(temp_path)
 
@@ -53,7 +53,7 @@ class TestCLIMain:
 
             captured = capsys.readouterr()
             # Error message is printed without filename prefix for deduplication
-            assert "credentials required" in captured.err.lower()
+            assert "jenkins url not provided" in captured.err.lower()
         finally:
             os.unlink(temp_path)
 
@@ -83,9 +83,9 @@ class TestCLIMain:
 
             captured = capsys.readouterr()
             # Verify the error is present
-            assert "credentials required" in captured.err.lower()
+            assert "jenkins url not provided" in captured.err.lower()
             # Verify deduplication - the credentials message should appear exactly once
-            assert captured.err.lower().count("credentials required") == 1
+            assert captured.err.lower().count("jenkins url not provided") == 1
         finally:
             os.unlink(temp_path1)
             os.unlink(temp_path2)
@@ -129,7 +129,7 @@ class TestCLIMain:
 
             captured = capsys.readouterr()
             assert "Validating" in captured.out
-            assert "credentials required" in captured.err.lower()
+            assert "jenkins url not provided" in captured.err.lower()
         finally:
             os.unlink(temp_path)
 
@@ -504,7 +504,7 @@ class TestCLIIncludeOption:
                 assert exc_info.value.code == 1
 
             captured = capsys.readouterr()
-            assert "credentials required" in captured.err.lower()
+            assert "jenkins url not provided" in captured.err.lower()
         finally:
             os.unlink(temp_path)
 
