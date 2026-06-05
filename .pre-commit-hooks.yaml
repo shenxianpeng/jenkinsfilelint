@@ -4,5 +4,5 @@
   entry: jenkinsfilelint
   language: python
   types: [file]
-  files: ^.*(Jenkinsfile.*|.*\.groovy)$
+  files: (?i)^(.*/)?(Jenkinsfile[^/]*|.*\.groovy)$
   require_serial: true
