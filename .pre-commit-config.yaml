@@ -28,4 +28,4 @@ repos:
         exclude: ^jenkinsfilelint/
         pass_filenames: true
         verbose: true
-        stages: [manual]  # pre-commit run jenkinsfilelint --all-files --hook-stage manual
+        stages: [pre-commit]
