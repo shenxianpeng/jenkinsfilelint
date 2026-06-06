@@ -1,7 +1,7 @@
 # Jenkinsfile Lint
 
-[![CI](https://github.com/shenxianpeng/jenkinsfilelint/actions/workflows/main.yml/badge.svg)](https://github.com/shenxianpeng/jenkinsfilelint/actions/workflows/main.yml)
-[![codecov](https://codecov.io/gh/shenxianpeng/jenkinsfilelint/graph/badge.svg?token=Z9UTXBL2XG)](https://codecov.io/gh/shenxianpeng/jenkinsfilelint)
+[![CI](https://github.com/jenkinsci/jenkinsfilelint/actions/workflows/main.yml/badge.svg)](https://github.com/jenkinsci/jenkinsfilelint/actions/workflows/main.yml)
+[![codecov](https://codecov.io/gh/jenkinsci/jenkinsfilelint/graph/badge.svg?token=nGrwXORFtI)](https://codecov.io/gh/jenkinsci/jenkinsfilelint)
 [![PyPI version](https://img.shields.io/pypi/v/jenkinsfilelint)](https://pypi.org/project/jenkinsfilelint/)
 
 Catch Jenkinsfile syntax errors before they break your CI.
@@ -29,7 +29,7 @@ Catch Jenkinsfile syntax errors before they break your CI.
 ```yaml
 # .pre-commit-config.yaml
 repos:
-  - repo: https://github.com/shenxianpeng/jenkinsfilelint
+  - repo: https://github.com/jenkinsci/jenkinsfilelint
     rev: # use the latest or a specific version, e.g. v1.4.0
     hooks:
       - id: jenkinsfilelint
