@@ -29,7 +29,7 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/shenxianpeng/jenkinsfilelint"
+Homepage = "https://github.com/jenkinsci/jenkinsfilelint"
 
 [project.scripts]
 jenkinsfilelint = "jenkinsfilelint.cli:main"
