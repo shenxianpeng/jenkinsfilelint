@@ -8,6 +8,8 @@ Catch Jenkinsfile syntax errors before they break your CI.
 
 `jenkinsfilelint` sends your Jenkinsfiles to your Jenkins server's `/pipeline-model-converter/validate` endpoint for real syntax validation. It's primarily a [pre-commit](https://pre-commit.com/) hook, but also works as a CLI tool.
 
+![demo](demo.gif)
+
 ## Table of Contents
 
 - [Quick Start](#quick-start)
