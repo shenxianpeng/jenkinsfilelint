@@ -4,3 +4,8 @@ _extends: github:jenkinsci/.github:/.github/release-drafter.yml
 name-template: $NEXT_PATCH_VERSION
 tag-template: $NEXT_PATCH_VERSION
 version-template: $MAJOR.$MINOR.$PATCH
+template: |
+  <!-- Optional: add a release summary here -->
+  $CHANGES
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...$NEXT_PATCH_VERSION
